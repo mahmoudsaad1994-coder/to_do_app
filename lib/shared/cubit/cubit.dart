@@ -134,4 +134,14 @@ class AppCubit extends Cubit<AppStates> {
     selectedRepeate = newRepeate;
     emit(SelecteNewRepeateState());
   }
+
+  bool isDateTime = true;
+
+  isDateTimeTrue(TimeOfDay t) {
+    final now = DateTime.now();
+    isDateTime = DateTime.now()
+        .isBefore(DateTime(now.year, now.month, now.day, t.hour, t.minute));
+    print(isDateTime);
+    emit(IsTimeDateTrueeState());
+  }
 }
