@@ -19,3 +19,5 @@ class AppUpdateDatabaseState extends AppStates {}
 class AppDeleteDatabaseState extends AppStates {}
 
 class SelecteNewRepeateState extends AppStates {}
+
+class IsTimeDateTrueeState extends AppStates {}

@@ -72,6 +72,7 @@ class HomeLayout extends StatelessWidget {
                 timeControlor.text = DateFormat('hh:mm a')
                     .format(DateTime.now().add(const Duration(minutes: 5)))
                     .toString();
+
                 scafoldKey.currentState!
                     .showBottomSheet(
                       (context) => Container(
@@ -126,18 +127,18 @@ class HomeLayout extends StatelessWidget {
                                         showTimePicker(
                                           context: context,
                                           initialTime: TimeOfDay.now(),
-                                        ).then((value) => {
-                                              timeControlor.text = value!
-                                                  .format(context)
-                                                  .toString()
-                                            });
+                                        ).then((value) {
+                                          timeControlor.text =
+                                              value!.format(context).toString();
+                                          cubit.isDateTimeTrue(value);
+                                        });
                                       },
                                       labelText: 'Task Time',
                                       validat: (String? value) {
-                                        if (value!.isEmpty) {
-                                          return 'time muse not be empty';
+                                        if (cubit.isDateTime) {
+                                          return null;
                                         }
-                                        return null;
+                                        return 'Enter a valid time';
                                       },
                                       prefixIcon: Icons.watch_later_outlined,
                                     ),
