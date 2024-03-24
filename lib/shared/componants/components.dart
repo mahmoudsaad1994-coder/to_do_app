@@ -1,6 +1,8 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../models/task_model.dart';
 import '../cubit/cubit.dart';
 
 Widget defaultFormFeild({
@@ -20,7 +22,9 @@ Widget defaultFormFeild({
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        border: const OutlineInputBorder(),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        ),
         prefixIcon: Icon(prefixIcon),
         suffixIcon: suffixOnPressed == null
             ? null
@@ -39,11 +43,15 @@ Widget defaultFormFeild({
       readOnly: readOnly,
     );
 
-Widget buildTaskItem(Map model, context) {
+Widget buildTaskItem(TaskModel model, context) {
   return Dismissible(
-    key: Key('${model['id']}'),
+    key: Key('${model.id}'),
     onDismissed: (direction) {
-      AppCubit.get(context).deleteData(id: model['id']);
+      if (model.status == 'archive') {
+        AppCubit.get(context).deleteData(id: model.id!);
+      } else {
+        AppCubit.get(context).updateData(status: 'archive', id: model.id!);
+      }
     },
     child: Padding(
       padding: const EdgeInsets.all(20.0),
@@ -51,7 +59,13 @@ Widget buildTaskItem(Map model, context) {
         children: [
           CircleAvatar(
             radius: 40,
-            child: Text('${model['time']}'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('${model.time}'),
+                Text('${model.date}'),
+              ],
+            ),
           ),
           const SizedBox(width: 20),
           Expanded(
@@ -60,44 +74,42 @@ Widget buildTaskItem(Map model, context) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${model['title']}',
+                  '${model.title}',
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '${model['date']}',
+                  '${model.description}',
                   style: const TextStyle(color: Colors.grey),
                 ),
               ],
             ),
           ),
-          if (model['status'] != 'new')
+          if (model.status != 'new')
             IconButton(
               onPressed: () {
-                AppCubit.get(context)
-                    .updateData(status: 'new', id: model['id']);
+                AppCubit.get(context).updateData(status: 'new', id: model.id!);
               },
               icon: const Icon(
                 Icons.restart_alt_rounded,
                 color: Colors.red,
               ),
             ),
-          if (model['status'] != 'done')
+          if (model.status != 'done')
             IconButton(
               onPressed: () {
-                AppCubit.get(context)
-                    .updateData(status: 'done', id: model['id']);
+                AppCubit.get(context).updateData(status: 'done', id: model.id!);
               },
               icon: const Icon(
                 Icons.check_box,
                 color: Colors.green,
               ),
             ),
-          if (model['status'] != 'archive')
+          if (model.status != 'archive')
             IconButton(
               onPressed: () {
                 AppCubit.get(context)
-                    .updateData(status: 'archive', id: model['id']);
+                    .updateData(status: 'archive', id: model.id!);
               },
               icon: const Icon(
                 Icons.archive,
@@ -110,7 +122,7 @@ Widget buildTaskItem(Map model, context) {
   );
 }
 
-ConditionalBuilder tasksBuilder(List<Map<dynamic, dynamic>> tasks) {
+ConditionalBuilder tasksBuilder(List<TaskModel> tasks) {
   return ConditionalBuilder(
     condition: tasks.isNotEmpty,
     builder: (context) => ListView.separated(

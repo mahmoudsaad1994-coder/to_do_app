@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import '../../../modules/archive_tasks/archive_tasks_screen.dart';
 import '../../../modules/done_tasks/done_tasks_screen.dart';
 import '../../../modules/new_tasks/new_tasks_screen.dart';
+import '../../models/task_model.dart';
 import 'states.dart';
 
 class AppCubit extends Cubit<AppStates> {
@@ -33,9 +34,10 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   Database? database;
-  List<Map> newtasks = [];
-  List<Map> donetasks = [];
-  List<Map> archivetasks = [];
+  String tableName = 'tasks';
+  List<TaskModel> newtasks = [];
+  List<TaskModel> donetasks = [];
+  List<TaskModel> archivetasks = [];
 
   createDataBase() {
     openDatabase(
@@ -44,14 +46,13 @@ class AppCubit extends Cubit<AppStates> {
       onCreate: (db, version) {
         db
             .execute(
-                'CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, date TEXT, time TEXT, status TEXT)')
+                'CREATE TABLE $tableName (id INTEGER PRIMARY KEY, title TEXT, description TEXT, date TEXT, time TEXT, status TEXT, repeat STRING)')
             .then((value) => debugPrint('created Table'))
             .catchError(
                 (error) => debugPrint('error when create table $error'));
       },
       onOpen: (database) {
         getDataFromDatabase(database);
-        debugPrint('database opened');
       },
     ).then((value) {
       database = value;
@@ -59,23 +60,12 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  Future insertToDataBase({
-    required String title,
-    required String time,
-    required String date,
-  }) async {
-    return await database!.transaction((txn) {
-      return txn
-          .rawInsert(
-              'INSERT INTO tasks(title, date, time, status) VALUES("$title","$date","$time","new")')
-          .then((value) {
-        debugPrint('$value inserted succs');
-        emit(AppInsertDatabaseState());
-        // to get the new data that you inserted
-        getDataFromDatabase(database);
-      }).catchError((error) {
-        debugPrint('error when inserted new record $error');
-      });
+  Future insertToDataBase({TaskModel? model}) async {
+    return await database!.insert(tableName, model!.toJson()).then((value) {
+      getDataFromDatabase(database);
+      emit(AppInsertDatabaseState());
+    }).catchError((error) {
+      debugPrint('error when inserted new record $error');
     });
   }
 
@@ -86,12 +76,13 @@ class AppCubit extends Cubit<AppStates> {
     emit(AppGetDatabaseLoadingState());
     db!.rawQuery('SELECT * FROM tasks').then((value) {
       value.forEach((element) {
+        print('value $value , $element');
         if (element['status'] == 'new') {
-          newtasks.add(element);
+          newtasks.add(TaskModel.fromJson(element));
         } else if (element['status'] == 'done') {
-          donetasks.add(element);
+          donetasks.add(TaskModel.fromJson(element));
         } else {
-          archivetasks.add(element);
+          archivetasks.add(TaskModel.fromJson(element));
         }
       });
       emit(AppGetDatabaseState());
@@ -133,5 +124,14 @@ class AppCubit extends Cubit<AppStates> {
     isBottomSheetShown = isShow;
     fadeIcon = icon;
     emit(AppChangeBottomSheetState());
+  }
+
+  //repeate
+  String selectedRepeate = 'Only one';
+  List<String> repeatList = ['Only one', 'Daily', 'Weekly', 'Monthly'];
+
+  newSelectedRepeate(String newRepeate) {
+    selectedRepeate = newRepeate;
+    emit(SelecteNewRepeateState());
   }
 }
