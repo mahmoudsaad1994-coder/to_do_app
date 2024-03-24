@@ -44,7 +44,50 @@ class HomeLayout extends StatelessWidget {
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 )),
-            centerTitle: true,
+            actions: [
+              IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                              title: const Text('warning'),
+                              content: Text(
+                                'You are about to clear all tasks in ${cubit.titles[cubit.currentIndex]}',
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    textStyle:
+                                        Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  child: const Text('Yes, I\'m sure'),
+                                  onPressed: () {
+                                    if (cubit.currentIndex == 0) {
+                                      cubit.deleteTasksInList(status: 'new');
+                                    } else if (cubit.currentIndex == 1) {
+                                      cubit.deleteTasksInList(status: 'done');
+                                    } else {
+                                      cubit.deleteTasksInList(
+                                          status: 'archive');
+                                    }
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    textStyle:
+                                        Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  child: const Text('No'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            ));
+                  },
+                  icon: const Icon(Icons.delete))
+            ],
           ),
           body: ConditionalBuilder(
             condition: state is! AppGetDatabaseLoadingState,

@@ -76,7 +76,6 @@ class AppCubit extends Cubit<AppStates> {
     emit(AppGetDatabaseLoadingState());
     db!.rawQuery('SELECT * FROM tasks').then((value) {
       value.forEach((element) {
-        print('value $value , $element');
         if (element['status'] == 'new') {
           newtasks.add(TaskModel.fromJson(element));
         } else if (element['status'] == 'done') {
@@ -108,6 +107,18 @@ class AppCubit extends Cubit<AppStates> {
     return await database!.rawDelete(
       'DELETE FROM tasks WHERE id = ?',
       ['$id'],
+    ).then((value) {
+      getDataFromDatabase(database);
+      emit(AppDeleteDatabaseState());
+    });
+  }
+
+  deleteTasksInList({
+    required String status,
+  }) async {
+    return await database!.rawDelete(
+      'DELETE FROM tasks WHERE status = ?',
+      [status],
     ).then((value) {
       getDataFromDatabase(database);
       emit(AppDeleteDatabaseState());

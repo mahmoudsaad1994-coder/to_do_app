@@ -1,6 +1,5 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../models/task_model.dart';
 import '../cubit/cubit.dart';
@@ -53,19 +52,21 @@ Widget buildTaskItem(TaskModel model, context) {
         AppCubit.get(context).updateData(status: 'archive', id: model.id!);
       }
     },
-    child: Padding(
-      padding: const EdgeInsets.all(20.0),
+    child: Container(
+      padding: const EdgeInsets.all(10.0),
+      margin: const EdgeInsetsDirectional.symmetric(horizontal: 5),
+      decoration: BoxDecoration(
+        color: (model.status != 'new') ? Colors.grey[300] : Colors.blueAccent,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 40,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('${model.time}'),
-                Text('${model.date}'),
-              ],
-            ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('${model.time}'),
+              Text('${model.date}'),
+            ],
           ),
           const SizedBox(width: 20),
           Expanded(
@@ -76,11 +77,17 @@ Widget buildTaskItem(TaskModel model, context) {
                 Text(
                   '${model.title}',
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   '${model.description}',
-                  style: const TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: Colors.black54),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
